@@ -50,6 +50,8 @@ $this->title = 'Login';
             <hr>
             <div class="text-center">
                 <a class="small" href="<?php echo \yii\helpers\Url::to(['/site/forgot-password'])?>">Forgot Password?</a>
+                <hr>
+                <a class="small" href="<?php echo \yii\helpers\Url::to(['/site/signup'])?>">Signup</a>
             </div>
         </div>
     </div>

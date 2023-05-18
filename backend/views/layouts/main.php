@@ -247,7 +247,8 @@ AppAsset::register($this);
                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <span class="mr-2 d-none d-lg-inline text-gray-600 small">
                                 <?php
-                                echo Yii::$app->user->identity->getDisplayName(); ?></span>
+                                echo Yii::$app->user->isGuest? "UserName":Yii::$app->user->identity->getDisplayName(); ?></span>
+
                             <img class="img-profile rounded-circle"
                                  src="img/undraw_profile.svg">
                         </a>
