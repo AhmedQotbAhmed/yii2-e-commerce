@@ -3,6 +3,11 @@
 namespace common\models;
 
 use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
+use yii\helpers\FileHelper;
+use yii\web\UploadedFile;
+
 
 /**
  * This is the model class for table "{{%products}}".
@@ -22,14 +27,37 @@ use Yii;
  * @property User $createdBy
  * @property User $updatedBy
  */
-class Produc extends \yii\db\ActiveRecord
+class Product extends \yii\db\ActiveRecord
 {
+    /**
+     * @var \yii\web\UploadedFile
+     */
+    public $imageFile;
+
     /**
      * {@inheritdoc}
      */
+
     public static function tableName()
     {
         return '{{%products}}';
+    }
+
+    /**
+     * {@inheritdoc}
+     * @return \common\models\query\ProductQuery the active query used by this AR class.
+     */
+    public static function find()
+    {
+        return new \common\models\query\ProductQuery(get_called_class());
+    }
+
+    public function behaviors()
+    {
+        return [
+            TimestampBehavior::class,
+            BlameableBehavior::class
+        ];
     }
 
     /**
@@ -41,6 +69,7 @@ class Produc extends \yii\db\ActiveRecord
             [['name', 'price', 'status'], 'required'],
             [['description'], 'string'],
             [['price'], 'number'],
+            [['imageFile'], 'image', 'extensions' => 'png, jpg, jpeg, webp', 'maxSize' => 10 * 1024 * 1024],
             [['status', 'create_at', 'updated_at', 'created_by', 'updated_by'], 'integer'],
             [['name'], 'string', 'max' => 255],
             [['image'], 'string', 'max' => 2000],
@@ -58,13 +87,14 @@ class Produc extends \yii\db\ActiveRecord
             'id' => 'ID',
             'name' => 'Name',
             'description' => 'Description',
-            'image' => 'Image',
+            'image' => 'Product Image',
+            'imageFile' => 'Product Image',
             'price' => 'Price',
-            'status' => 'Status',
-            'create_at' => 'Create At',
-            'updated_at' => 'Updated At',
+            'status' => 'published',
+            'create_at' => 'datetime',
+            'updated_at' => 'datetime',
             'created_by' => 'Created By',
-            'updated_by' => 'Updated By',
+            'updated_by' => 'Datet',
         ];
     }
 
@@ -98,12 +128,49 @@ class Produc extends \yii\db\ActiveRecord
         return $this->hasOne(User::class, ['id' => 'updated_by']);
     }
 
-    /**
-     * {@inheritdoc}
-     * @return \common\models\query\ProductQuery the active query used by this AR class.
-     */
-    public static function find()
+
+    public function save($runValidation = true, $attributeNames = null)
     {
-        return new \common\models\query\ProductQuery(get_called_class());
+        if ($this->imageFile) {
+            $this->image = '/products/' . Yii::$app->security->generateRandomString() . '/' . $this->imageFile->name;
+        }
+
+        $transaction = Yii::$app->db->beginTransaction();
+        $ok = parent::save($runValidation, $attributeNames);
+
+        if ($ok && $this->imageFile) {
+            $fullPath = Yii::getAlias('@frontend/web/storage' . $this->image);
+            echo '<pre>';
+            var_dump($fullPath);
+            var_dump($this->image);
+            var_dump($this->imageFile);
+            echo '</pre>';
+            exit;
+            $dir = dirname($fullPath);
+            if (!FileHelper::createDirectory($dir) | !$this->imageFile->saveAs($fullPath)) {
+                $transaction->rollBack();
+
+                return false;
+            }
+        }
+
+        $transaction->commit();
+
+        return $ok;
+    }
+
+
+    public function getImageUrl()
+    {
+        return self::formatImageUrl($this->image);
+    }
+
+    public static function formatImageUrl($imagePath)
+    {
+        if ($imagePath) {
+            return Yii::$app->params['frontendUrl'] . '/storage' . $imagePath;
+        }
+
+        return Yii::$app->params['frontendUrl'] . '/img/no_image_available.png';
     }
 }
