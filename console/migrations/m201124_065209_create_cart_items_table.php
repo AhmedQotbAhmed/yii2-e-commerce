@@ -9,7 +9,7 @@ use yii\db\Migration;
  * - `{{%products}}`
  * - `{{%orders}}`
  */
-class m201124_065210_create_cart_items_table extends Migration
+class m201124_065209_create_cart_items_table extends Migration
 {
     /**
      * {@inheritdoc}
