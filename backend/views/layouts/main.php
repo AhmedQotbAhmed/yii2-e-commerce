@@ -41,7 +41,7 @@ AppAsset::register($this);
         <hr class="sidebar-divider my-0">
         <!-- Nav Item - Dashboard -->
         <li class="nav-item active">
-            <a class="nav-link" href="index.html">
+            <a class="nav-link" href="<?php echo \yii\helpers\Url::to('/site/index') ?>">
                 <i class="fas fa-fw fa-tachometer-alt"></i>
                 <span>Dashboard</span></a>
         </li>
@@ -51,7 +51,7 @@ AppAsset::register($this);
 
         <!-- Nav Item - Charts -->
         <li class="nav-item">
-            <a class="nav-link" href="charts.html">
+            <a class="nav-link" href="<?php echo \yii\helpers\Url::to('/product/index') ?>">
                 <i class="fas fa-fw fa-chart-area"></i>
                 <span>Product</span></a>
         </li>
