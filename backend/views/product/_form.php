@@ -31,8 +31,10 @@ use yii\bootstrap5\ActiveForm;
    </div>
 ',
             'labelOptions' => ['class' => 'custom-file-label'],
-            'inputOptions' => ['class' => 'custom-file-input']
+            'inputOptions' => ['class' => 'custom-file-input', 'id' => 'image-file-input']
         ])->fileInput(['type' => 'file']) ?>
+
+
 
     <?= $form->field($model, 'price')->textInput(['maxlength' => true, 'type' => 'number']) ?>
 

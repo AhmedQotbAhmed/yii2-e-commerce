@@ -144,29 +144,65 @@ class Product extends \yii\db\ActiveRecord
         return new \common\models\query\ProductQuery(get_called_class());
     }
 
+//    public function save($runValidation = true, $attributeNames = null)
+//    {
+////        if ($this->imageFile) {
+////        }
+//        $this->image = '/products/' . Yii::$app->security->generateRandomString() . '/' . $this->imageFile->name;
+//
+//        $transaction = Yii::$app->db->beginTransaction();
+//        $ok = parent::save($runValidation, $attributeNames);
+//
+//        if ($ok && $this->imageFile) {
+//            $fullPath = Yii::getAlias('@frontend/web/storage' . $this->image);
+//            $dir = dirname($fullPath);
+//            if (!FileHelper::createDirectory($dir) | !$this->imageFile->saveAs($fullPath)) {
+//                $transaction->rollBack();
+//
+//                return false;
+//            }
+//        }
+//
+//        $transaction->commit();
+//
+//        return $ok;
+//    }
+
     public function save($runValidation = true, $attributeNames = null)
     {
-        if ($this->imageFile) {
-            $this->image = '/products/' . Yii::$app->security->generateRandomString() . '/' . $this->imageFile->name;
-        }
-
         $transaction = Yii::$app->db->beginTransaction();
-        $ok = parent::save($runValidation, $attributeNames);
 
-        if ($ok && $this->imageFile) {
-            $fullPath = Yii::getAlias('@frontend/web/storage' . $this->image);
-            $dir = dirname($fullPath);
-            if (!FileHelper::createDirectory($dir) | !$this->imageFile->saveAs($fullPath)) {
-                $transaction->rollBack();
+        try {
+            if ($this->imageFile) {
+                $this->image = '/products/' . Yii::$app->security->generateRandomString() . '/' . $this->imageFile->name;
 
-                return false;
+                $fullPath = Yii::getAlias('@frontend/web/storage' . $this->image);
+                $dir = dirname($fullPath);
+
+                if (!FileHelper::createDirectory($dir) || !$this->imageFile->saveAs($fullPath)) {
+                    throw new \Exception('Failed to save the image file.');
+                }
             }
+//            echo' <br>';
+//            var_dump($this->imageFile);
+//            echo' <br>';
+//            exit;
+
+            $ok = parent::save($runValidation, $attributeNames);
+
+            if (!$ok) {
+                throw new \Exception('Failed to save the object.');
+            }
+
+            $transaction->commit();
+            return true;
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            Yii::error($e->getMessage(), 'error');
+            return false;
         }
-
-        $transaction->commit();
-
-        return $ok;
     }
+
 
     public function getImageUrl()
     {
