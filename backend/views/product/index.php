@@ -40,8 +40,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'image',
                 'content' => function ($model) {
                     /** @var \common\models\Product $model */
-                    return Html::img($model->getImageUrl(), ['style' => 'width: 50px']);
-                }
+                    return Html::img($model->getImageUrl(), ['style' => 'width: 150px']);
+//                    return $model->getImageUrl();
+//                    return $model->image;
+                },
+//                'format'=>'image'
             ],
             [
                 'attribute' => 'name',

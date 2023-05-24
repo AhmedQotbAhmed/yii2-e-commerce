@@ -7,7 +7,7 @@ use yii\data\ActiveDataProvider;
 use common\models\Product;
 
 /**
- * ProductSearch represents the model behind the search form of `common\models\Product`.
+ * ProductSearch represents the model behind the categorySearch form of `common\models\Product`.
  */
 class ProductSearch extends Product
 {
@@ -33,7 +33,7 @@ class ProductSearch extends Product
     }
 
     /**
-     * Creates data provider instance with search query applied
+     * Creates data provider instance with categorySearch query applied
      *
      * @param array $params
      *

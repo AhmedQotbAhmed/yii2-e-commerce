@@ -77,9 +77,18 @@ class ProductController extends Controller
     public function actionCreate()
     {
         $model = new Product();
-        $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
+//        $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post()) ) {
+            $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
+//            var_dump( $model->imageFile->name);
+//die;
+//            $model->image = '/products/' . Yii::$app->security->generateRandomString() . '/' . $model->imageFile->name;
+
+            if(!$model->save()){
+                var_dump( $model->errors);
+                die;
+            }
             return $this->redirect(['view', 'id' => $model->id]);
         }
 

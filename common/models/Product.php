@@ -10,21 +10,22 @@ use yii\helpers\FileHelper;
 /**
  * This is the model class for table "{{%products}}".
  *
- * @property int         $id
- * @property string      $name
+ * @property int $id
+ * @property string $name
  * @property string|null $description
  * @property string|null $image
- * @property float       $price
- * @property int         $status
- * @property int|null    $created_at
- * @property int|null    $updated_at
- * @property int|null    $created_by
- * @property int|null    $updated_by
+ * @property float $price
+ * @property int $status
+ * @property int|null $created_at
+ * @property int|null $updated_at
+ * @property int|null $created_by
+ * @property int|null $updated_by
  *
- * @property CartItem[]  $cartItems
+ * @property CartItem[] $cartItems
  * @property OrderItem[] $orderItems
- * @property User        $createdBy
- * @property User        $updatedBy
+ * @property User $createdBy
+ * @property User $updatedBy
+ * @property Category $category
  */
 class Product extends \yii\db\ActiveRecord
 {
@@ -132,7 +133,15 @@ class Product extends \yii\db\ActiveRecord
      */
     public function getUpdatedBy()
     {
-        return $this->hasOne(User::className(), ['id' => 'updated_by']);
+        return $this->hasOne(User::class, ['id' => 'updated_by']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCategory()
+    {
+        return $this->hasOne(Category::class, ['id' => 'categoryId']);
     }
 
     /**
@@ -144,63 +153,29 @@ class Product extends \yii\db\ActiveRecord
         return new \common\models\query\ProductQuery(get_called_class());
     }
 
-//    public function save($runValidation = true, $attributeNames = null)
-//    {
-////        if ($this->imageFile) {
-////        }
-//        $this->image = '/products/' . Yii::$app->security->generateRandomString() . '/' . $this->imageFile->name;
-//
-//        $transaction = Yii::$app->db->beginTransaction();
-//        $ok = parent::save($runValidation, $attributeNames);
-//
-//        if ($ok && $this->imageFile) {
-//            $fullPath = Yii::getAlias('@frontend/web/storage' . $this->image);
-//            $dir = dirname($fullPath);
-//            if (!FileHelper::createDirectory($dir) | !$this->imageFile->saveAs($fullPath)) {
-//                $transaction->rollBack();
-//
-//                return false;
-//            }
-//        }
-//
-//        $transaction->commit();
-//
-//        return $ok;
-//    }
-
     public function save($runValidation = true, $attributeNames = null)
     {
-        $transaction = Yii::$app->db->beginTransaction();
+        if ($this->imageFile) {
+            $this->image = '/products/' . Yii::$app->security->generateRandomString() . '/' . $this->imageFile->name;
 
-        try {
-            if ($this->imageFile) {
-                $this->image = '/products/' . Yii::$app->security->generateRandomString() . '/' . $this->imageFile->name;
-
-                $fullPath = Yii::getAlias('@frontend/web/storage' . $this->image);
-                $dir = dirname($fullPath);
-
-                if (!FileHelper::createDirectory($dir) || !$this->imageFile->saveAs($fullPath)) {
-                    throw new \Exception('Failed to save the image file.');
-                }
-            }
-//            echo' <br>';
-//            var_dump($this->imageFile);
-//            echo' <br>';
-//            exit;
-
-            $ok = parent::save($runValidation, $attributeNames);
-
-            if (!$ok) {
-                throw new \Exception('Failed to save the object.');
-            }
-
-            $transaction->commit();
-            return true;
-        } catch (\Exception $e) {
-            $transaction->rollBack();
-            Yii::error($e->getMessage(), 'error');
-            return false;
         }
+
+        $transaction = Yii::$app->db->beginTransaction();
+        $ok = parent::save($runValidation, $attributeNames);
+
+        if ($ok && $this->imageFile) {
+            $fullPath = Yii::getAlias('@frontend/web/storage' . $this->image);
+            $dir = dirname($fullPath);
+            if (!FileHelper::createDirectory($dir) | !$this->imageFile->saveAs($fullPath)) {
+                $transaction->rollBack();
+
+                return false;
+            }
+        }
+
+        $transaction->commit();
+
+        return $ok;
     }
 
 
@@ -215,7 +190,7 @@ class Product extends \yii\db\ActiveRecord
             return Yii::$app->params['frontendUrl'] . '/storage' . $imagePath;
         }
 
-        return Yii::$app->params['frontendUrl'] . '/img/no_image_available.png';
+        return Yii::$app->params['frontendUrl'] . '/img/no_image_available.jpg';
     }
 
     /**
@@ -233,7 +208,7 @@ class Product extends \yii\db\ActiveRecord
     {
         parent::afterDelete();
         if ($this->image) {
-            $dir = Yii::getAlias('@frontend/web/storage'). dirname($this->image);
+            $dir = Yii::getAlias('@frontend/web/storage') . dirname($this->image);
             FileHelper::removeDirectory($dir);
         }
     }
